@@ -1,0 +1,222 @@
+$N = 6
+
+$L = $N*$N
+
+;;Définition de la matrice X représentant la grille 1
+$x(1,1)=[ ] $x(1,2)=[ ] $x(1,3)=[ ] $x(1,4)=[ ] $x(1,5)=[ ] $x(1,6)=[ ]
+$x(2,1)=[ ] $x(2,2)=[ ] $x(2,3)=[B] $x(2,4)=[ ] $x(2,5)=[N] $x(2,6)=[B]
+$x(3,1)=[ ] $x(3,2)=[N] $x(3,3)=[B] $x(3,4)=[N] $x(3,5)=[B] $x(3,6)=[ ]
+$x(4,1)=[ ] $x(4,2)=[N] $x(4,3)=[ ] $x(4,4)=[ ] $x(4,5)=[ ] $x(4,6)=[B]
+$x(5,1)=[ ] $x(5,2)=[N] $x(5,3)=[N] $x(5,4)=[ ] $x(5,5)=[ ] $x(5,6)=[ ]
+$x(6,1)=[ ] $x(6,2)=[ ] $x(6,3)=[ ] $x(6,4)=[ ] $x(6,5)=[ ] $x(6,6)=[B]
+
+
+;;Exercice 1.1
+bigand $i in [1..$N]:
+    bigand $j in [1..$N]:
+        (if B in $x($i, $j) then
+            ;; Si la matrice X contient B à la position (i,j), alors B(i,j) est Vrai
+            B($i, $j) 
+        else
+            Top
+        end)
+        and
+        (if N in $x($i, $j) then
+            ;; Si la matrice X contient N à la position (i,j), alors N(i,j) est Vrai
+            N($i, $j)
+        else
+            Top
+        end)
+    end
+end
+
+;; Exercice 1.2
+bigand $i in [1..$N]:
+    bigand $j in [1..$N]:
+        ;; La cellule n'est pas vide et ne contient pas les deux en même temps
+        (B($i,$j) or N($i,$j)) and not(B($i,$j) and N($i,$j))
+    end
+end
+
+;;Exercice 1.3
+bigand $i in [1..$N-1]:
+    bigand $j in [1..$N-1]:
+        ;; Il y a au moins un Blanc dans le carré 2x2 
+        (B($i,$j) or B($i+1, $j) or B($i, $j+1) or B($i+1, $j+1))
+        and
+        ;; Il y a au moins un Noir dans le carré 2x2 
+        (N($i,$j) or N($i+1, $j) or N($i, $j+1) or N($i+1, $j+1))
+    end
+end
+
+;; Exercice 3.1
+bigand $c in [B, N]:
+    ;; Exactement une cellule du carré 2x2 en haut à gauche
+    ;; est dans le territoire de couleur $c à l'étape 0
+    (r(0, $c, 1, 1) and not r(0, $c, 1, 2) and not r(0, $c, 2, 1) and not r(0, $c, 2, 2)
+    or
+    not r(0, $c, 1, 1) and r(0, $c, 1, 2) and not r(0, $c, 2, 1) and not r(0, $c, 2, 2)
+    or
+    not r(0, $c, 1, 1) and not r(0, $c, 1, 2) and r(0, $c, 2, 1) and not r(0, $c, 2, 2)
+    or
+    not r(0, $c, 1, 1) and not r(0, $c, 1, 2) and not r(0, $c, 2, 1) and r(0, $c, 2, 2))
+    
+    and
+
+    ;; Aucune autre cellule de la grille n'est dans le territoire à l'étape 0
+    bigand $i in [1..$N]:
+        bigand $j in [1..$N]:
+            (if $i > 2 or $j >2 then
+                not r(0, $c, $i, $j)
+            else
+                ;; Top permet de ne pas ajouter de contrainte
+                Top
+            end)
+        end
+    end
+end
+
+bigand $i in [1..2]: 
+    bigand $j in [1..2]:
+        ;; Si (i,j) est le départ du territoire Blanc, alors la case doit être Blanche
+        (r(0, B, $i, $j) => B($i, $j))
+        and
+        ;; Si (i,j) est le départ du territoire Noir, alors la case doit être Noire
+        (r(0, N, $i, $j) => N($i, $j))
+    end
+end
+
+;; Exercice 3.2
+bigand $e in [1..$L]:
+    bigand $c in [B, N]:
+        bigand $i in [1..$N]:
+            bigand $j in [1..$N]:
+                (
+                    ;; Si c est Blanc, on exige B(i,j). Si c est Noir, on exige N(i,j)
+                    (if $c == B then 
+                        B($i, $j) 
+                    else 
+                        N($i, $j) 
+                    end)
+
+                    and
+                    ;; On vérifie si au moins un des 4 voisins était dans le territoire à l'étape e-1
+                    (
+                        (if $i > 1 then 
+                            ;; Voisin du haut
+                            r($e-1, $c, $i-1, $j) 
+                        else 
+                            Bottom ;; Faux car le voisin n'existe pas 
+                        end)
+                        or
+                        (if $i < $N then 
+                            ;; Voisin du bas
+                            r($e-1, $c, $i+1, $j) 
+                        else 
+                            Bottom  
+                        end)
+                        or
+                        (if $j > 1 then 
+                            ;; Voisin du gauche
+                            r($e-1, $c, $i, $j-1) 
+                        else 
+                            Bottom 
+                        end)
+                        or
+                        (if $j < $N then 
+                            ;; Voisin du droite
+                            r($e-1, $c, $i, $j+1) 
+                        else 
+                            Bottom 
+                        end)
+                    )
+                )
+                ;; Si la case est de la bonne couleur et a un voisin connecté, 
+                ;; alors elle devient connectée à l'étape e. 
+                => r($e, $c, $i, $j)
+            end
+        end
+    end
+end
+
+;; Exercice 3.3
+bigand $e in [1..$L]:
+    bigand $c in [B, N]:
+        bigand $i in [1..$N]:
+            bigand $j in [1..$N]:
+                ;; Si la cellule (i,j) était dans le territoire de couleur $c à l'étape e-1,
+                ;; alors elle doit rester dans le territoire à l'étape e
+                r($e-1, $c, $i, $j) => r($e, $c, $i, $j)
+            end
+        end
+    end
+end
+
+;; Exercice 3.4
+bigand $e in [1..$L]:
+    bigand $c in [B, N]:
+        bigand $i in [1..$N]:
+            bigand $j in [1..$N]:
+                (not r($e-1, $c, $i, $j) and r($e, $c, $i, $j)) 
+                =>
+                (
+                    (if $i > 1 then 
+                        ;; Voisin du haut
+                        r($e-1, $c, $i-1, $j) 
+                    else 
+                        Bottom ;; Faux car le voisin n'existe pas 
+                    end)
+                    or
+                    (if $i < $N then 
+                        ;; Voisin du bas
+                        r($e-1, $c, $i+1, $j) 
+                    else 
+                        Bottom  
+                    end)
+                    or
+                    (if $j > 1 then 
+                        ;; Voisin du gauche
+                        r($e-1, $c, $i, $j-1) 
+                    else 
+                        Bottom 
+                    end)
+                    or
+                    (if $j < $N then 
+                        ;; Voisin du droite
+                        r($e-1, $c, $i, $j+1) 
+                    else 
+                        Bottom 
+                    end)
+                )
+            end
+        end
+    end
+end
+
+;; Exercice 3.5
+bigand $c in [B, N]:
+    bigand $i in [1..$N]:
+        bigand $j in [1..$N]:
+            (if $c == B then
+                ;; La cellule (i,j) contient un pion blanc
+               B($i, $j)
+           else
+                ;; La cellule (i,j) contient un pion noir
+                N($i, $j)
+            end)
+            =>
+            ;; La cellule (i,j) est dans le territoire de couleur c à l'étape finale L
+            r($L, $c, $i, $j) 
+        end
+    end
+end
+
+
+bigand $i in [1..$N]:
+    bigand $j in [1..$N]:
+        ;; La cellule (i,j) appartient à au moins un territoire
+        (r($L, B, $i, $j) or r($L, N, $i, $j))
+        ;; La cellule (i,j) ne peut pas appartenir aux deux territoires
+        and not (r($L, B, $i, $j) and r($L, N, $i, $j))
+    end
+end

@@ -1,0 +1,39 @@
+$N = 6
+
+;;Définition de la matrice X représentant la grille initiale
+$x(1,1)=[ ] $x(1,2)=[ ] $x(1,3)=[ ] $x(1,4)=[ ] $x(1,5)=[ ] $x(1,6)=[ ]
+$x(2,1)=[ ] $x(2,2)=[ ] $x(2,3)=[B] $x(2,4)=[ ] $x(2,5)=[N] $x(2,6)=[B]
+$x(3,1)=[ ] $x(3,2)=[N] $x(3,3)=[B] $x(3,4)=[N] $x(3,5)=[B] $x(3,6)=[ ]
+$x(4,1)=[ ] $x(4,2)=[N] $x(4,3)=[ ] $x(4,4)=[ ] $x(4,5)=[ ] $x(4,6)=[B]
+$x(5,1)=[ ] $x(5,2)=[N] $x(5,3)=[N] $x(5,4)=[ ] $x(5,5)=[ ] $x(5,6)=[ ]
+$x(6,1)=[ ] $x(6,2)=[ ] $x(6,3)=[ ] $x(6,4)=[ ] $x(6,5)=[ ] $x(6,6)=[B]
+
+;;Exercice 2.1
+bigand $i in [1..$N]:
+    bigand $j in [1..$N]:
+        (if B in $x($i, $j) then
+            ;; Si la matrice X contient B à la position (i,j), alors N(i,j) doit être Faux
+            not N($i, $j) 
+        else
+            Top
+        end)
+        and
+        (if N in $x($i, $j) then
+            ;; Si la matrice X contient N à la position (i,j), alors N(i,j) doit être Vrai
+            N($i, $j)
+        else
+            Top
+        end)
+    end
+end
+
+;;Exercice 2.2
+bigand $i in [1..$N-1]:
+    bigand $j in [1..$N-1]:
+        ;; Il y a au moins un Blanc dans le carré 2x2 
+        (not N($i,$j) or not N($i+1, $j) or not N($i, $j+1) or not N($i+1, $j+1))
+        and
+        ;; Il y a au moins un Noir dans le carré 2x2 
+        (N($i,$j) or N($i+1, $j) or N($i, $j+1) or N($i+1, $j+1))
+    end
+end
