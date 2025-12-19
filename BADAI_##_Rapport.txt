@@ -10,3 +10,7 @@ bigand $i in [1..$N]:
     end
 end
 ***************************************************************
+
+Exercice 4.3
+Dans le modèle, L représente le nombre maximal d'étapes de propagation nécessaires pour construire entièrement les territoires blancs et noirs à partir de leurs cellules initiales.
+La valeur minimale de L est la distance maximale entre la cellule initiale d'un territoire et la cellule la plus éloignée de ce territoire.
