@@ -5,13 +5,14 @@ $x(1,1)=[N] $x(1,2)=[ ] $x(1,3)=[ ] $x(1,4)=[ ] $x(1,5)=[ ] $x(1,6)=[ ] $x(1,7)=
 $x(2,1)=[ ] $x(2,2)=[N] $x(2,3)=[ ] $x(2,4)=[ ] $x(2,5)=[ ] $x(2,6)=[B] $x(2,7)=[B] $x(2,8)=[ ] $x(2,9)=[N] $x(2,10)=[ ]
 $x(3,1)=[ ] $x(3,2)=[ ] $x(3,3)=[ ] $x(3,4)=[N] $x(3,5)=[B] $x(3,6)=[ ] $x(3,7)=[ ] $x(3,8)=[ ] $x(3,9)=[B] $x(3,10)=[ ]
 $x(4,1)=[ ] $x(4,2)=[ ] $x(4,3)=[ ] $x(4,4)=[ ] $x(4,5)=[ ] $x(4,6)=[B] $x(4,7)=[ ] $x(4,8)=[B] $x(4,9)=[ ] $x(4,10)=[ ]
-$x(5,1)=[ ] $x(5,2)=[ ] $x(5,3)=[n] $x(5,4)=[ ] $x(5,5)=[ ] $x(5,6)=[ ] $x(5,7)=[ ] $x(5,8)=[ ] $x(5,9)=[N] $x(5,10)=[ ]
+$x(5,1)=[ ] $x(5,2)=[ ] $x(5,3)=[N] $x(5,4)=[ ] $x(5,5)=[ ] $x(5,6)=[ ] $x(5,7)=[ ] $x(5,8)=[ ] $x(5,9)=[N] $x(5,10)=[ ]
 $x(6,1)=[ ] $x(6,2)=[ ] $x(6,3)=[ ] $x(6,4)=[B] $x(6,5)=[ ] $x(6,6)=[ ] $x(6,7)=[N] $x(6,8)=[ ] $x(6,9)=[ ] $x(6,10)=[ ]
 $x(7,1)=[ ] $x(7,2)=[N] $x(7,3)=[ ] $x(7,4)=[B] $x(7,5)=[B] $x(7,6)=[ ] $x(7,7)=[ ] $x(7,8)=[N] $x(7,9)=[ ] $x(7,10)=[ ]
 $x(8,1)=[ ] $x(8,2)=[ ] $x(8,3)=[ ] $x(8,4)=[B] $x(8,5)=[ ] $x(8,6)=[ ] $x(8,7)=[N] $x(8,8)=[ ] $x(8,9)=[ ] $x(8,10)=[ ]
 $x(9,1)=[ ] $x(9,2)=[N] $x(9,3)=[ ] $x(9,4)=[ ] $x(9,5)=[B] $x(9,6)=[ ] $x(9,7)=[ ] $x(9,8)=[N] $x(9,9)=[ ] $x(9,10)=[ ]
 $x(10,1)=[B] $x(10,2)=[ ] $x(10,3)=[N] $x(10,4)=[ ] $x(10,5)=[ ] $x(10,6)=[ ] $x(10,7)=[ ] $x(10,8)=[ ] $x(10,9)=[ ] $x(10,10)=[ ]
 
+;; 5.1 – Étape 0 : départ dans le carré 2x2 en haut à gauche
 bigand $c in [B, N]:
     (r(0, $c, 1, 1) and not r(0, $c, 1, 2) and not r(0, $c, 2, 1) and not r(0, $c, 2, 2)
     or
@@ -32,6 +33,7 @@ bigand $c in [B, N]:
     end
 end
 
+;; 5.2 – Stabilité
 bigand $e in [1..$L]:
     bigand $c in [B, N]:
         bigand $i in [1..$N]:
@@ -42,24 +44,31 @@ bigand $e in [1..$L]:
     end
 end
 
+;; 5.3 – Propagation seulement pour les cases de la couleur c à la fin
 bigand $e in [1..$L]:
     bigand $c in [B, N]:
         bigand $i in [1..$N]:
             bigand $j in [1..$N]:
-                (not r($e-1, $c, $i, $j) and r($e, $c, $i, $j))
-                =>
-                (if $i > 1 then r($e-1, $c, $i-1, $j) else Bottom end)
-                or
-                (if $i < $N then r($e-1, $c, $i+1, $j) else Bottom end)
-                or
-                (if $j > 1 then r($e-1, $c, $i, $j-1) else Bottom end)
-                or
-                (if $j < $N then r($e-1, $c, $i, $j+1) else Bottom end)
+                (
+                    r($L, $c, $i, $j)  ;; la case est de couleur c à la fin
+                    and
+                    (
+                        (if $i > 1 then r($e-1, $c, $i-1, $j) else Bottom end)
+                        or
+                        (if $i < $N then r($e-1, $c, $i+1, $j) else Bottom end)
+                        or
+                        (if $j > 1 then r($e-1, $c, $i, $j-1) else Bottom end)
+                        or
+                        (if $j < $N then r($e-1, $c, $i, $j+1) else Bottom end)
+                    )
+                )
+                => r($e, $c, $i, $j)
             end
         end
     end
 end
 
+;; 5.4.1 – Respect de la grille initiale
 bigand $i in [1..$N]:
     bigand $j in [1..$N]:
         (if B in $x($i, $j) then
@@ -76,6 +85,7 @@ bigand $i in [1..$N]:
     end
 end
 
+;; 5.4.2 – Chaque case dans exactement un territoire
 bigand $i in [1..$N]:
     bigand $j in [1..$N]:
         (r($L, B, $i, $j) or r($L, N, $i, $j))
@@ -84,6 +94,7 @@ bigand $i in [1..$N]:
     end
 end
 
+;; 5.4.3 – Pas de carré 2x2 monochrome
 bigand $i in [1..$N-1]:
     bigand $j in [1..$N-1]:
         not (r($L, B, $i, $j) and r($L, B, $i+1, $j) and r($L, B, $i, $j+1) and r($L, B, $i+1, $j+1))
