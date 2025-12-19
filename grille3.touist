@@ -219,3 +219,89 @@ bigand $i in [1..$N]:
         and not (r($L, B, $i, $j) and r($L, N, $i, $j))
     end
 end
+
+
+
+;; 5.1
+bigand $c in [B, N]:
+    (r(0, $c, 1, 1) and not r(0, $c, 1, 2) and not r(0, $c, 2, 1) and not r(0, $c, 2, 2)
+    or
+    not r(0, $c, 1, 1) and r(0, $c, 1, 2) and not r(0, $c, 2, 1) and not r(0, $c, 2, 2)
+    or
+    not r(0, $c, 1, 1) and not r(0, $c, 1, 2) and r(0, $c, 2, 1) and not r(0, $c, 2, 2)
+    or
+    not r(0, $c, 1, 1) and not r(0, $c, 1, 2) and not r(0, $c, 2, 1) and r(0, $c, 2, 2))
+    and
+    bigand $i in [1..$N]:
+        bigand $j in [1..$N]:
+            (if $i > 2 or $j > 2 then
+                not r(0, $c, $i, $j)
+            else
+                Top
+            end)
+        end
+    end
+end
+
+;; 5.2
+bigand $e in [1..$L]:
+    bigand $c in [B, N]:
+        bigand $i in [1..$N]:
+            bigand $j in [1..$N]:
+                r($e-1, $c, $i, $j) => r($e, $c, $i, $j)
+            end
+        end
+    end
+end
+
+;; 5.3
+bigand $e in [1..$L]:
+    bigand $c in [B, N]:
+        bigand $i in [1..$N]:
+            bigand $j in [1..$N]:
+                (not r($e-1, $c, $i, $j) and r($e, $c, $i, $j))
+                =>
+                (if $i > 1 then r($e-1, $c, $i-1, $j) else Bottom end)
+                or
+                (if $i < $N then r($e-1, $c, $i+1, $j) else Bottom end)
+                or
+                (if $j > 1 then r($e-1, $c, $i, $j-1) else Bottom end)
+                or
+                (if $j < $N then r($e-1, $c, $i, $j+1) else Bottom end)
+            end
+        end
+    end
+end
+
+;; 5.4
+bigand $i in [1..$N]:
+    bigand $j in [1..$N]:
+        (if B in $x($i, $j) then
+            r($L, B, $i, $j)
+        else
+            Top
+        end)
+        and
+        (if N in $x($i, $j) then
+            r($L, N, $i, $j)
+        else
+            Top
+        end)
+    end
+end
+
+bigand $i in [1..$N]:
+    bigand $j in [1..$N]:
+        (r($L, B, $i, $j) or r($L, N, $i, $j))
+        and
+        not (r($L, B, $i, $j) and r($L, N, $i, $j))
+    end
+end
+
+bigand $i in [1..$N-1]:
+    bigand $j in [1..$N-1]:
+        not (r($L, B, $i, $j) and r($L, B, $i+1, $j) and r($L, B, $i, $j+1) and r($L, B, $i+1, $j+1))
+        and
+        not (r($L, N, $i, $j) and r($L, N, $i+1, $j) and r($L, N, $i, $j+1) and r($L, N, $i+1, $j+1))
+    end
+end
