@@ -1,0 +1,93 @@
+$N = 10
+$L = $N * $N
+
+$x(1,1)=[N] $x(1,2)=[ ] $x(1,3)=[ ] $x(1,4)=[ ] $x(1,5)=[ ] $x(1,6)=[ ] $x(1,7)=[ ] $x(1,8)=[ ] $x(1,9)=[ ] $x(1,10)=[ ]
+$x(2,1)=[ ] $x(2,2)=[N] $x(2,3)=[ ] $x(2,4)=[ ] $x(2,5)=[ ] $x(2,6)=[B] $x(2,7)=[B] $x(2,8)=[ ] $x(2,9)=[N] $x(2,10)=[ ]
+$x(3,1)=[ ] $x(3,2)=[ ] $x(3,3)=[ ] $x(3,4)=[N] $x(3,5)=[B] $x(3,6)=[ ] $x(3,7)=[ ] $x(3,8)=[ ] $x(3,9)=[B] $x(3,10)=[ ]
+$x(4,1)=[ ] $x(4,2)=[ ] $x(4,3)=[ ] $x(4,4)=[ ] $x(4,5)=[ ] $x(4,6)=[B] $x(4,7)=[ ] $x(4,8)=[B] $x(4,9)=[ ] $x(4,10)=[ ]
+$x(5,1)=[ ] $x(5,2)=[ ] $x(5,3)=[n] $x(5,4)=[ ] $x(5,5)=[ ] $x(5,6)=[ ] $x(5,7)=[ ] $x(5,8)=[ ] $x(5,9)=[N] $x(5,10)=[ ]
+$x(6,1)=[ ] $x(6,2)=[ ] $x(6,3)=[ ] $x(6,4)=[B] $x(6,5)=[ ] $x(6,6)=[ ] $x(6,7)=[N] $x(6,8)=[ ] $x(6,9)=[ ] $x(6,10)=[ ]
+$x(7,1)=[ ] $x(7,2)=[N] $x(7,3)=[ ] $x(7,4)=[B] $x(7,5)=[B] $x(7,6)=[ ] $x(7,7)=[ ] $x(7,8)=[N] $x(7,9)=[ ] $x(7,10)=[ ]
+$x(8,1)=[ ] $x(8,2)=[ ] $x(8,3)=[ ] $x(8,4)=[B] $x(8,5)=[ ] $x(8,6)=[ ] $x(8,7)=[N] $x(8,8)=[ ] $x(8,9)=[ ] $x(8,10)=[ ]
+$x(9,1)=[ ] $x(9,2)=[N] $x(9,3)=[ ] $x(9,4)=[ ] $x(9,5)=[B] $x(9,6)=[ ] $x(9,7)=[ ] $x(9,8)=[N] $x(9,9)=[ ] $x(9,10)=[ ]
+$x(10,1)=[B] $x(10,2)=[ ] $x(10,3)=[N] $x(10,4)=[ ] $x(10,5)=[ ] $x(10,6)=[ ] $x(10,7)=[ ] $x(10,8)=[ ] $x(10,9)=[ ] $x(10,10)=[ ]
+
+bigand $c in [B, N]:
+    (r(0, $c, 1, 1) and not r(0, $c, 1, 2) and not r(0, $c, 2, 1) and not r(0, $c, 2, 2)
+    or
+    not r(0, $c, 1, 1) and r(0, $c, 1, 2) and not r(0, $c, 2, 1) and not r(0, $c, 2, 2)
+    or
+    not r(0, $c, 1, 1) and not r(0, $c, 1, 2) and r(0, $c, 2, 1) and not r(0, $c, 2, 2)
+    or
+    not r(0, $c, 1, 1) and not r(0, $c, 1, 2) and not r(0, $c, 2, 1) and r(0, $c, 2, 2))
+    and
+    bigand $i in [1..$N]:
+        bigand $j in [1..$N]:
+            (if $i > 2 or $j > 2 then
+                not r(0, $c, $i, $j)
+            else
+                Top
+            end)
+        end
+    end
+end
+
+bigand $e in [1..$L]:
+    bigand $c in [B, N]:
+        bigand $i in [1..$N]:
+            bigand $j in [1..$N]:
+                r($e-1, $c, $i, $j) => r($e, $c, $i, $j)
+            end
+        end
+    end
+end
+
+bigand $e in [1..$L]:
+    bigand $c in [B, N]:
+        bigand $i in [1..$N]:
+            bigand $j in [1..$N]:
+                (not r($e-1, $c, $i, $j) and r($e, $c, $i, $j))
+                =>
+                (if $i > 1 then r($e-1, $c, $i-1, $j) else Bottom end)
+                or
+                (if $i < $N then r($e-1, $c, $i+1, $j) else Bottom end)
+                or
+                (if $j > 1 then r($e-1, $c, $i, $j-1) else Bottom end)
+                or
+                (if $j < $N then r($e-1, $c, $i, $j+1) else Bottom end)
+            end
+        end
+    end
+end
+
+bigand $i in [1..$N]:
+    bigand $j in [1..$N]:
+        (if B in $x($i, $j) then
+            r($L, B, $i, $j)
+        else
+            Top
+        end)
+        and
+        (if N in $x($i, $j) then
+            r($L, N, $i, $j)
+        else
+            Top
+        end)
+    end
+end
+
+bigand $i in [1..$N]:
+    bigand $j in [1..$N]:
+        (r($L, B, $i, $j) or r($L, N, $i, $j))
+        and
+        not (r($L, B, $i, $j) and r($L, N, $i, $j))
+    end
+end
+
+bigand $i in [1..$N-1]:
+    bigand $j in [1..$N-1]:
+        not (r($L, B, $i, $j) and r($L, B, $i+1, $j) and r($L, B, $i, $j+1) and r($L, B, $i+1, $j+1))
+        and
+        not (r($L, N, $i, $j) and r($L, N, $i+1, $j) and r($L, N, $i, $j+1) and r($L, N, $i+1, $j+1))
+    end
+end
